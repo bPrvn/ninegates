@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect width="48" height="48" rx="11" fill="#00110A"/>
+  <g fill="none" stroke-linecap="butt">
+    <!-- back to front; each arch carries a thin dark edge so the layers separate like the Ninegates mark -->
+    <path d="M36.2 39V20.6a7.6 7.6 0 0 0-10.9-6.85" stroke="#EEE0CB" stroke-width="3.3"/>
+    <path d="M30 39V21.6a7.6 7.6 0 0 0-10.2-7.15" stroke="#00110A" stroke-width="5.6"/>
+    <path d="M30 39V21.6a7.6 7.6 0 0 0-10.2-7.15" stroke="#EEE0CB" stroke-width="3.3"/>
+    <path d="M9 39V22.5a7.6 7.6 0 0 1 15.2 0V39" stroke="#00110A" stroke-width="5.6"/>
+    <path d="M9 39V22.5a7.6 7.6 0 0 1 15.2 0V39" stroke="#EEE0CB" stroke-width="3.3"/>
+  </g>
+</svg>

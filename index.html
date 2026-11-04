@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ninegates — Every gate your brand needs</title>
+  <meta name="description" content="Ninegates — every gate your brand needs, all in one place." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="assets/favicon/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/favicon/icon-32.png" sizes="32x32" type="image/png" />
+  <link rel="icon" href="assets/favicon/icon-16.png" sizes="16x16" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta name="theme-color" content="#00110A" />
+  <script>
+    // Always start at the top: the intro must never play over a restored scroll position
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+    addEventListener('beforeunload', function () { window.scrollTo(0, 0); });
+  </script>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body class="is-loading">
+  <!-- WebGL stage -->
+  <canvas id="stage" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Intro loader -->
+  <div class="loader" id="loader">
+    <div class="loader-logo"><img src="assets/logo.png" alt="Ninegates" width="229" height="45" /></div>
+    <div class="loader-count"><span id="count">0</span></div>
+    <button class="skip" id="skip" type="button">Skip intro</button>
+  </div>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <!-- Nav -->
+  <header class="nav" id="nav">
+    <a href="#home" class="brand" aria-label="Ninegates home">
+      <img class="brand-logo" src="assets/logo.png" alt="Ninegates" width="229" height="45" />
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#home" class="active">Home</a>
+      <a href="#services">Services</a>
+      <a href="#projects">Projects</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact us</a>
+    </nav>
+    <a href="#contact" class="btn btn-cream magnetic js-open-form">
+      <span>Start a Project</span>
+      <img class="btn-mark" src="assets/mark.png" alt="" />
+    </a>
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><i></i><i></i></button>
+  </header>
+
+  <main id="content">
+    <!-- HERO -->
+    <!-- Rows are pinned to the exact Figma positions (y in 1440×900 frame px) by main.js -->
+    <section class="hero" id="home">
+      <div class="hero-row" style="--y: 377.5" data-fit="313">
+        <p class="eyebrow reveal-up" id="heroEyebrow">Every gate your brand needs</p>
+      </div>
+      <div class="hero-row" style="--y: 452" data-fit="545">
+        <h1 class="hero-title" id="heroTitle">All in one place</h1>
+      </div>
+      <div class="hero-row hero-cta" style="--y: 698.5">
+      <a href="#contact" class="btn btn-glass magnetic reveal-up js-open-form">
+        <span class="btn-arrow">
+          <svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6" /></svg>
+        </span>
+        <span>Start a Project</span>
+      </a>
+      </div>
+      <div class="scroll-hint reveal-up"><span></span>Scroll to walk through the gates</div>
+    </section>
+
+    <!-- MARQUEE: Strategy ⋒ Design ⋒ Content -->
+    <div class="marquee" aria-label="Strategy, Design, Content, Branding, Digital, AI Production">
+      <div class="mq-track" aria-hidden="true">
+        <div class="mq-group"><span class="mq-word">STRATEGY</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">DESIGN</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">CONTENT</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">BRANDING</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">DIGITAL</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">AI PRODUCTION</span><img class="mq-mark" src="assets/mark.png" alt="" /></div>
+        <div class="mq-group"><span class="mq-word">STRATEGY</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">DESIGN</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">CONTENT</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">BRANDING</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">DIGITAL</span><img class="mq-mark" src="assets/mark.png" alt="" /><span class="mq-word">AI PRODUCTION</span><img class="mq-mark" src="assets/mark.png" alt="" /></div>
+      </div>
+    </div>
+
+    <!-- WHO WE ARE -->
+    <section class="panel who" id="about">
+      <div class="who-left">
+        <p class="kicker reveal">Who we are</p>
+        <h2 class="who-title reveal">Every brand has a door.<br /><em>We help you walk through it.</em></h2>
+      </div>
+      <div class="who-right">
+        <p class="who-copy reveal">NineGates is a creative studio for modern brands. We bring branding, content, digital and AI production under one roof, so your story looks and sounds the same everywhere it appears.</p>
+        <p class="who-copy reveal">One team means one direction. We plan, design and produce together, and we stay with you after launch, because a brand grows by showing up again and again, not by launching once.</p>
+        <div class="who-cols">
+          <div class="reveal">
+            <h3>Our Approach</h3>
+            <p>Strategy, design, content and technology working together to create meaningful brand experiences.</p>
+          </div>
+          <div class="reveal">
+            <h3>One Connected Experience</h3>
+            <p>From brand identity to digital experiences, every touchpoint works together to create a consistent and memorable brand.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT WE DO -->
+    <section class="panel what" id="services">
+      <div class="what-head">
+        <p class="kicker reveal">What we do</p>
+        <h2 class="what-title reveal">Six Gates,<br /><em>Endless Possibilities.</em></h2>
+        <p class="what-copy reveal">From brand identity to digital experiences, we offer end-to-end creative and marketing solutions to help your business grow.</p>
+      </div>
+      <div class="gate-cards">
+        <article class="gate-card"><span class="gc-icon"><img class="gc-mark" src="assets/mark.png" alt="" /></span><h3>Brand &amp; Identity</h3><p>We build distinctive brand identities through strategy, logo design, visual systems, packaging, and guidelines that make your business instantly recognisable.</p></article>
+        <article class="gate-card"><span class="gc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="6.5" width="12.5" height="11" rx="2"/><path d="M15.5 10.5 21 7.5v9l-5.5-3"/></svg></span><h3>Creative &amp; Content</h3><p>We create compelling visuals, photography, brochures, social media creatives, video edits, and motion graphics that bring your brand story to life.</p></article>
+        <article class="gate-card"><span class="gc-icon"><svg viewBox="0 0 24 24"><path d="M10 3.5l1.9 5.1L17 10.5l-5.1 1.9L10 17.5l-1.9-5.1L3 10.5l5.1-1.9z"/><path d="M18 3v4M16 5h4M18.5 15.5v3M17 17h3"/></svg></span><h3>AI Creative Studio</h3><p>We use AI to create striking visuals, product concepts, advertising creatives, videos, avatars, and animations that turn bold ideas into reality.</p></article>
+        <article class="gate-card"><span class="gc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12.5" rx="1.8"/><path d="M8.5 20.5h7M12 16.5v4"/></svg></span><h3>Web &amp; Digital Experience</h3><p>We design and develop websites, landing pages, apps, e-commerce platforms, and intuitive digital experiences that connect your brand with its audience.</p></article>
+        <article class="gate-card"><span class="gc-icon"><svg viewBox="0 0 24 24" class="fill"><rect x="4" y="13" width="4" height="7" rx="1"/><rect x="10" y="9" width="4" height="11" rx="1"/><rect x="16" y="4" width="4" height="16" rx="1"/></svg></span><h3>Digital Growth</h3><p>We strengthen your online presence through social media, SEO, content marketing, personal branding, and engagement to help your business reach the right audience.</p></article>
+        <article class="gate-card"><span class="gc-icon"><svg viewBox="0 0 24 24"><path d="M4 20v-3M8 20v-5M12 20v-7M16 20v-9M20 20v-11"/><path d="M4 12l5-4 4 2 6-6M15 4h4v4"/></svg></span><h3>Performance Marketing</h3><p>We plan and manage targeted advertising campaigns, generate leads, optimise conversions, and track results to turn marketing investment into measurable growth.</p></article>
+      </div>
+    </section>
+
+    <!-- HOW WE DO -->
+    <section class="panel process" id="process">
+      <div class="what-head">
+        <p class="kicker reveal">How we do</p>
+        <h2 class="what-title reveal">From Ideas to Impact,<br /><em>Step by Step.</em></h2>
+        <p class="what-copy reveal">Every great brand begins with a clear direction. We believe good creative work starts with understanding your business, your audience, and the goals you want to achieve.</p>
+      </div>
+      <ol class="steps">
+        <li class="step"><span class="step-num">01</span><span class="step-icon"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v10.5H9l-4 3.5V16H4z"/><path d="M8 9.5h8M8 12.5h5"/></svg></span><h3>Discover</h3><p>We understand your business, goals, target audience and challenges.</p></li>
+        <li class="step"><span class="step-num">02</span><span class="step-icon"><svg viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20.5H6z"/><path d="M14 3.5v4h4M9 12h6M9 15.5h6"/></svg></span><h3>Plan</h3><p>We create a clear strategy, define the scope and plan the right solution for your brand.</p></li>
+        <li class="step"><span class="step-num">03</span><span class="step-icon"><svg viewBox="0 0 24 24"><path d="M4 20l9-9M15 4l5 5-3 1-3-3z"/><path d="M5 5l4 4M4 8l4-4 3 3-4 4z"/><path d="M14 14l5 5-1.5 1.5-5-5"/></svg></span><h3>Create</h3><p>Our team designs, produces and builds high-quality creative assets and digital experiences.</p></li>
+        <li class="step"><span class="step-num">04</span><span class="step-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3 5.5 5.5"/></svg></span><h3>Execute</h3><p>We bring everything to life — from design to development and campaign execution.</p></li>
+        <li class="step"><span class="step-num">05</span><span class="step-icon"><svg viewBox="0 0 24 24" class="fill"><rect x="5" y="12" width="3.5" height="8" rx="1.2"/><rect x="10.25" y="6" width="3.5" height="14" rx="1.2"/><rect x="15.5" y="10" width="3.5" height="10" rx="1.2"/></svg></span><h3>Optimize</h3><p>We monitor performance, refine strategies and improve results continuously.</p></li>
+        <li class="step"><span class="step-num">06</span><span class="step-icon"><svg viewBox="0 0 24 24"><path d="M4 20v-3M8 20v-5M12 20v-7M16 20v-9M20 20v-11"/><path d="M4 12l5-4 4 2 6-6M15 4h4v4"/></svg></span><h3>Grow</h3><p>We scale what works and keep supporting your brand for long-term success.</p></li>
+      </ol>
+    </section>
+
+    <!-- PROJECTS — pinned horizontal scroll on desktop, swipe on mobile -->
+    <section class="panel projects-sec" id="projects">
+      <div class="what-head">
+        <h2 class="what-title reveal">Work That Creates <em>Real Impact.</em></h2>
+        <p class="what-copy reveal">A selection of our recent work across branding, digital experiences, content and marketing, built to create real business results.</p>
+      </div>
+      <div class="proj-filters reveal" role="tablist" aria-label="Filter projects">
+        <button class="pf-btn is-active" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
+        <button class="pf-btn" type="button" role="tab" aria-selected="false" data-filter="brand">Brand &amp; Identity</button>
+        <button class="pf-btn" type="button" role="tab" aria-selected="false" data-filter="creative">Creative &amp; Content</button>
+        <button class="pf-btn" type="button" role="tab" aria-selected="false" data-filter="ai">AI Creative Studio</button>
+        <button class="pf-btn" type="button" role="tab" aria-selected="false" data-filter="web">Web Design</button>
+        <button class="pf-btn" type="button" role="tab" aria-selected="false" data-filter="growth">Digital Growth</button>
+        <button class="pf-btn" type="button" role="tab" aria-selected="false" data-filter="performance">Performance Marketing</button>
+      </div>
+      <div class="proj-viewport">
+        <div class="proj-track">
+          <a class="proj-card" href="#" data-cats="brand">
+            <div class="proj-img"><img src="assets/projects/crovon-biotech.png" alt="Crovon Biotech" loading="lazy" width="433" height="259" /></div>
+            <div class="proj-body"><h3>Crovon Biotech</h3><p>Product labels and marketing designs for agricultural solutions.</p></div>
+          </a>
+          <a class="proj-card" href="#" data-cats="web">
+            <div class="proj-img"><img src="assets/projects/mentcura.png" alt="Mentcura" loading="lazy" width="433" height="259" /></div>
+            <div class="proj-body"><h3>Mentcura</h3><p>A modern website experience designed to communicate Mentcura's mental wellness services.</p></div>
+          </a>
+          <a class="proj-card" href="#" data-cats="creative">
+            <div class="proj-img"><img src="assets/projects/little-moments.png" alt="Little Moments" loading="lazy" width="433" height="259" /></div>
+            <div class="proj-body"><h3>Little Moments</h3><p>Natural photography project capturing genuine emotions, candid moments and expressive storytelling.</p></div>
+          </a>
+          <a class="proj-card" href="#" data-cats="ai growth">
+            <div class="proj-img"><img src="assets/projects/exselent-launch-film.png" alt="Exselent – Product Launch Film" loading="lazy" width="433" height="259" /></div>
+            <div class="proj-body"><h3>Exselent – Product Launch Film</h3><p>AI-powered product launch film for RiVue's Exselent, featuring cinematic visuals and storytelling.</p></div>
+          </a>
+          <a class="proj-card" href="#" data-cats="ai growth">
+            <div class="proj-img"><img src="assets/projects/diwali-promotion.png" alt="Diwali – Festive Promotion" loading="lazy" width="433" height="259" /></div>
+            <div class="proj-body"><h3>Diwali – Festive Promotion</h3><p>AI-generated Diwali promotional video featuring festive animation and diya product storytelling.</p></div>
+          </a>
+          <a class="proj-card" href="#" data-cats="creative">
+            <div class="proj-img"><img src="assets/projects/vikings-jersey.png" alt="Vikings Cricket Jersey" loading="lazy" width="433" height="259" /><div class="proj-tags"><span>Creative &amp; Content</span></div></div>
+            <div class="proj-body"><h3>Vikings Cricket Jersey</h3><p>Custom Vikings cricket jersey with bold colours, geometric graphics and personalised details.</p></div>
+          </a>
+        </div>
+        <p class="proj-empty" hidden>New work in this gate is on its way.</p>
+      </div>
+      <div class="proj-progress" aria-hidden="true"><span></span></div>
+    </section>
+
+    <!-- WHY NINEGATES — tiles rise and stack while the section is pinned -->
+    <section class="panel why" id="why">
+      <div class="why-left">
+        <p class="kicker reveal">Why NineGates</p>
+        <h2 class="why-title reveal">A Complete Partner<br /><em>For Brand Growth.</em></h2>
+        <p class="why-copy reveal">We bring strategy, creativity and technology together to deliver connected solutions that help businesses build stronger brands, reach the right audience and grow with confidence.</p>
+      </div>
+      <div class="why-right">
+        <span class="why-line" aria-hidden="true"><i></i></span>
+        <ol class="why-list">
+          <li class="why-tile"><span class="why-num">01</span><div><h3>Complete Creative Ecosystem</h3><p>From branding to marketing, design to content all your brand needs in one place.</p></div></li>
+          <li class="why-tile"><span class="why-num">02</span><div><h3>Strategy-Led Creativity</h3><p>Ideas backed by research, strategy and real business goals.</p></div></li>
+          <li class="why-tile"><span class="why-num">03</span><div><h3>Modern Tools &amp; AI</h3><p>We use the latest creative tools and AI to deliver high-quality work, faster and smarter.</p></div></li>
+          <li class="why-tile"><span class="why-num">04</span><div><h3>Industry Agnostic</h3><p>We work with businesses across all sectors, from local brands to growing startups.</p></div></li>
+          <li class="why-tile"><span class="why-num">05</span><div><h3>Cost-Effective &amp; Transparent</h3><p>Premium quality work with budget-friendly pricing and clear processes.</p></div></li>
+          <li class="why-tile"><span class="why-num">06</span><div><h3>Built for Long-Term Growth</h3><p>We don't just deliver projects, we build partnerships that support your brand's growth.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- CLIENT TESTIMONIALS — content lives in TESTIMONIALS in main.js -->
+    <section class="panel testi" id="testimonials">
+      <div class="testi-bg" aria-hidden="true"><img class="tb-a" alt="" /><img class="tb-b" alt="" /></div>
+      <div class="testi-top">
+        <div class="testi-left">
+          <p class="kicker reveal">Client testimonials</p>
+          <h2 class="testi-title reveal">Real People.<br /><em>Real Impact.</em></h2>
+          <p class="testi-copy reveal">Feedback from people and businesses we've worked with across branding, design, content and marketing.</p>
+        </div>
+        <div class="testi-feature reveal">
+          <div class="tf-img"><img class="fit-fill" alt="" aria-hidden="true" /><img class="fit-main" alt="" /></div>
+          <div class="tf-panel">
+            <svg class="tf-quote" viewBox="0 0 48 34" aria-hidden="true"><path d="M8.6 34C4 31.4 1 26.7 1 20.6 1 10.5 7.5 3.4 18.2 0l1.7 3.4c-6 2.3-9.3 6.2-9.7 10.6 4.8.2 8.3 3.4 8.3 8.2 0 5.2-3.8 8.6-8.9 8.6zm25.6 0c-4.6-2.6-7.6-7.3-7.6-13.4C26.6 10.5 33.1 3.4 43.8 0l1.7 3.4c-6 2.3-9.3 6.2-9.7 10.6 4.8.2 8.3 3.4 8.3 8.2 0 5.2-3.8 8.6-8.9 8.6z" fill="currentColor"/></svg>
+            <div class="tf-text" aria-live="polite">
+              <blockquote class="tf-quote-text"></blockquote>
+              <hr />
+              <p class="tf-name"></p>
+              <p class="tf-company"></p>
+            </div>
+            <div class="tf-arrows">
+              <button class="arrow-btn arrow-prev" type="button" aria-label="Previous testimonial"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+              <button class="arrow-btn arrow-next" type="button" aria-label="Next testimonial"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-thumbs" role="tablist" aria-label="Choose a testimonial"></div>
+      <div class="testi-nav">
+        <button class="arrow-btn arrow-prev" type="button" aria-label="Previous testimonial"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+        <button class="arrow-btn arrow-next" type="button" aria-label="Next testimonial"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </section>
+
+    <!-- FAQ — glass tiles over the main gate (draft answers: please review) -->
+    <section class="panel faq" id="faq">
+      <div class="faq-left">
+        <p class="kicker reveal">FAQ</p>
+        <h2 class="faq-title reveal">Have Questions ?<br /><em>We’ve Got Answers.</em></h2>
+        <p class="faq-copy reveal">Everything you need to know about working with NINEGATES from services and process to pricing and support.</p>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a0" id="faq-q0">
+            <span>What services does NINEGATES provide?</span><i aria-hidden="true"></i>
+          </button>
+          <div class="faq-a" id="faq-a0" role="region" aria-labelledby="faq-q0"><p>Everything your brand needs under one roof: brand &amp; identity, creative &amp; content, our AI creative studio, web &amp; digital experiences, digital growth and performance marketing. Take one gate, or walk through all of them with one team.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a1" id="faq-q1">
+            <span>Which industries do you work with?</span><i aria-hidden="true"></i>
+          </button>
+          <div class="faq-a" id="faq-a1" role="region" aria-labelledby="faq-q1"><p>We are industry agnostic. We work with businesses across all sectors, from local brands to growing startups and established companies.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a2" id="faq-q2">
+            <span>How does the process work?</span><i aria-hidden="true"></i>
+          </button>
+          <div class="faq-a" id="faq-a2" role="region" aria-labelledby="faq-q2"><p>Six clear steps: Discover, Plan, Create, Execute, Optimize and Grow. We start by understanding your business, goals and audience, then plan, produce and launch together, and keep improving results after launch.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a3" id="faq-q3">
+            <span>What are the pricing options?</span><i aria-hidden="true"></i>
+          </button>
+          <div class="faq-a" id="faq-a3" role="region" aria-labelledby="faq-q3"><p>Pricing depends on the scope of your project. After a short discovery call we share a clear, transparent quote with no hidden costs, premium quality at budget-friendly pricing.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a4" id="faq-q4">
+            <span>How long does a typical project take?</span><i aria-hidden="true"></i>
+          </button>
+          <div class="faq-a" id="faq-a4" role="region" aria-labelledby="faq-q4"><p>It depends on scope. A focused piece of work moves faster than a full brand build or website. We agree on a realistic timeline with you during the planning stage and keep you updated throughout.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a5" id="faq-q5">
+            <span>Do you offer monthly packages?</span><i aria-hidden="true"></i>
+          </button>
+          <div class="faq-a" id="faq-a5" role="region" aria-labelledby="faq-q5"><p>Yes. For ongoing needs like content, social media and performance marketing, we can set up a monthly plan around your goals. Get in touch and we'll recommend the right fit.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a6" id="faq-q6">
+            <span>Can I request custom services?</span><i aria-hidden="true"></i>
+          </button>
+          <div class="faq-a" id="faq-a6" role="region" aria-labelledby="faq-q6"><p>Absolutely. Every brand is different, so we shape the scope around what you actually need, whether that's a single deliverable or a combination of services.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button" aria-expanded="false" aria-controls="faq-a7" id="faq-q7">
+            <span>What kind of support do you provide after delivery?</span><i aria-hidden="true"></i>
+          </button>
+          <div class="faq-a" id="faq-a7" role="region" aria-labelledby="faq-q7"><p>We don't just deliver and disappear. We stay with you after launch with updates, refinements and ongoing support, because a brand grows by showing up again and again.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- START A PROJECT — Figma "Desktop - 5"; text & button are live on top of the cleaned render -->
+    <section class="cta" id="start">
+      <div class="cta-stage">
+        <img class="cta-bg" src="assets/cta/start-project-bg.png" alt="" aria-hidden="true" />
+        <div class="cta-glass" aria-hidden="true"></div>
+        <div class="cta-text">
+          <h2 class="cta-title">Start a project</h2>
+          <p class="cta-copy">Tell us your goal once. We will take it through every gate you need.</p>
+        </div>
+        <a class="cta-btn" href="#contact" aria-label="Get in touch — open the contact form">
+          <span class="cta-fill" aria-hidden="true"></span>
+          <span class="cta-label">Get In Touch</span>
+          <span class="cta-knob" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+      </div>
+    </section>
+
+    <!-- CONTACT / FOOTER — glass panel (Figma final) -->
+    <section class="site-foot" id="contact">
+      <footer class="foot-glass">
+        <div class="foot-brand">
+          <a href="#home" class="foot-logo" aria-label="Ninegates home"><img src="assets/logo.png" alt="Ninegates" width="229" height="45" /></a>
+          <p>Every gate your brand needs. All in one place.<br />A creative partner for strategy, design, content and technology.</p>
+          <div class="foot-social">
+            <!-- TODO: add your real profile URLs -->
+            <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1" class="dot"/></svg></a>
+            <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M7.5 10.5v6M7.5 7.6v.01M11 16.5v-6M11 13c0-1.6 1-2.6 2.4-2.6s2.1 1 2.1 2.6v3.5"/></svg></a>
+            <a href="#" aria-label="X (Twitter)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20" class="x"/></svg></a>
+          </div>
+        </div>
+
+        <nav class="foot-col" aria-label="Explore">
+          <h3>Explore</h3>
+          <a href="#home">Home</a>
+          <a href="#about">About</a>
+          <a href="#services">Services</a>
+          <a href="#projects">Projects</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+
+        <nav class="foot-col" aria-label="Company">
+          <h3>Company</h3>
+          <a href="#process">Process</a>
+          <a href="#faq">Pricing</a>
+          <a href="#">Terms of use</a>
+          <a href="#">Privacy Policy</a>
+        </nav>
+
+        <div class="foot-col foot-touch">
+          <h3>Get in Touch</h3>
+          <a class="foot-msg js-open-form" href="#contact">Send us a message →</a>
+          <a class="foot-row" href="mailto:ninegates.official@gmail.com"><span class="foot-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></span>ninegates.official@gmail.com</a>
+          <a class="foot-row" href="tel:+918074570609"><span class="foot-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h3l1.5 4-2 1.5a11 11 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></svg></span>+91 807 457 0609</a>
+          <a class="foot-row" href="https://wa.me/918074570609?text=Hi%20NineGates%2C%20I%27d%20like%20to%20start%20a%20project." target="_blank" rel="noopener"><span class="foot-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/><path d="M9 9.5c.3 2 2.5 4.2 4.5 4.5l1.2-1.2 1.8.8c-.2 1-1 1.7-2 1.7-3.4 0-6.8-3.4-6.8-6.8 0-1 .7-1.8 1.7-2l.8 1.8z"/></svg></span>WhatsApp us</a>
+          <span class="foot-row"><span class="foot-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg></span>India</span>
+          <form class="foot-sub" action="mailto:ninegates.official@gmail.com" method="get">
+            <label class="sr-only" for="footEmail">Your email</label>
+            <input id="footEmail" type="email" name="body" placeholder="Your Email" required autocomplete="email" />
+            <input type="hidden" name="subject" value="Subscribe me to NineGates updates" />
+            <button type="submit" aria-label="Subscribe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5L21 3l-8.5 18-2-7.5z" class="fillp"/></svg></button>
+          </form>
+        </div>
+
+        <div class="foot-bottom">
+          <span>© 2026 NINEGATES, All Rights Reserved</span>
+          <span class="foot-tag">Built for brands with ambition</span>
+        </div>
+      </footer>
+    </section>
+  </main>
+
+
+  <!-- CONTACT FORM — glass dialog; "Send on WhatsApp" routes the filled form to +91 80745 70609 -->
+  <div class="cf" id="contactForm" hidden>
+    <div class="cf-overlay" data-cf-close></div>
+    <div class="cf-panel" role="dialog" aria-modal="true" aria-labelledby="cfTitle">
+      <button class="cf-close" type="button" aria-label="Close" data-cf-close><i></i><i></i></button>
+      <div class="cf-side">
+        <p class="kicker">Start a project</p>
+        <h2 id="cfTitle" class="cf-title">Let’s open<br /><em>the right gate.</em></h2>
+        <p class="cf-lede">Tell us your goal once. We will take it through every gate you need, and reply within one working day.</p>
+        <ul class="cf-direct">
+          <li><a href="https://wa.me/918074570609?text=Hi%20NineGates!" target="_blank" rel="noopener" class="cf-wa-link"><span class="foot-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/><path d="M8.8 8.6c.2-.5.6-.6.9-.6h.6c.2 0 .4.1.5.4l.8 1.9c.1.2 0 .5-.1.6l-.6.7c.6 1.2 1.6 2.2 2.8 2.8l.7-.6c.2-.2.4-.2.6-.1l1.9.8c.3.1.4.3.4.5v.6c0 .3-.1.7-.6.9-.6.3-1.3.4-2 .2-2.8-.8-5-3-5.8-5.8-.2-.7-.1-1.4.2-2z" class="f"/></svg></span>Chat on WhatsApp<small>+91 80745 70609</small></a></li>
+          <li><a href="mailto:ninegates.official@gmail.com"><span class="foot-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></span>ninegates.official@gmail.com</a></li>
+          <li><a href="tel:+918074570609"><span class="foot-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5h3l1.5 4-2 1.5a11 11 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></svg></span>+91 807 457 0609</a></li>
+        </ul>
+      </div>
+
+      <form class="cf-form" novalidate>
+        <div class="cf-grid">
+          <label class="cf-field"><span>Name *</span><input name="name" type="text" autocomplete="name" required placeholder="Your full name" /></label>
+          <label class="cf-field"><span>Email *</span><input name="email" type="email" autocomplete="email" required placeholder="you@company.com" /></label>
+          <label class="cf-field"><span>Phone</span><input name="phone" type="tel" autocomplete="tel" placeholder="+91" /></label>
+          <label class="cf-field"><span>Company / Brand</span><input name="company" type="text" autocomplete="organization" placeholder="Optional" /></label>
+          <label class="cf-field cf-wide"><span>What do you need? *</span>
+            <select name="service" required>
+              <option value="" disabled selected>Choose a gate</option>
+              <option>Brand &amp; Identity</option>
+              <option>Creative &amp; Content</option>
+              <option>AI Creative Studio</option>
+              <option>Web &amp; Digital Experience</option>
+              <option>Digital Growth</option>
+              <option>Performance Marketing</option>
+              <option>Multiple services</option>
+              <option>Not sure yet</option>
+            </select>
+          </label>
+          <label class="cf-field cf-wide"><span>Budget</span>
+            <select name="budget">
+              <option value="">Prefer not to say</option>
+              <option>Under ₹50,000</option>
+              <option>₹50,000 – ₹1,50,000</option>
+              <option>₹1,50,000 – ₹5,00,000</option>
+              <option>₹5,00,000+</option>
+            </select>
+          </label>
+          <label class="cf-field cf-wide"><span>Tell us about your project *</span><textarea name="message" rows="4" required placeholder="Your goal, timeline, anything we should know"></textarea></label>
+        </div>
+        <p class="cf-error" role="alert" hidden></p>
+        <div class="cf-actions">
+          <button class="cf-send cf-send-wa" type="submit" data-via="whatsapp"><span class="cf-send-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/><path d="M8.8 8.6c.2-.5.6-.6.9-.6h.6c.2 0 .4.1.5.4l.8 1.9c.1.2 0 .5-.1.6l-.6.7c.6 1.2 1.6 2.2 2.8 2.8l.7-.6c.2-.2.4-.2.6-.1l1.9.8c.3.1.4.3.4.5v.6c0 .3-.1.7-.6.9-.6.3-1.3.4-2 .2-2.8-.8-5-3-5.8-5.8-.2-.7-.1-1.4.2-2z" class="f"/></svg></span>Send on WhatsApp</button>
+          <button class="cf-send cf-send-mail" type="submit" data-via="email">Send by Email</button>
+        </div>
+        <p class="cf-note">Your details go straight to our team. Nothing is stored on this site.</p>
+      </form>
+
+      <div class="cf-done" hidden>
+        <span class="cf-done-mark"><img src="assets/mark.png" alt="" /></span>
+        <h3>Your gate is open.</h3>
+        <p>We’ve opened <strong class="cf-done-via">WhatsApp</strong> with your details. Press send there and we’ll get back to you within one working day.</p>
+        <button class="cf-send cf-send-mail" type="button" data-cf-close>Back to the site</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
