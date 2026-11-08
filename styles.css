@@ -202,6 +202,13 @@ section { min-height: 100vh; padding: 140px max(16px, 6vw) 100px; }
 }
 .scroll-hint span { width: 1px; height: 34px; background: linear-gradient(var(--cream), transparent); animation: drip 2s var(--ease) infinite; }
 @keyframes drip { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+/* phones (same breakpoint as main.js): headline in the sky, gate in the middle, text over the water */
+@media (max-aspect-ratio: 73/100) {
+  .hero-title { top: calc(29% - 1.08em); }
+  .hero-foot { bottom: max(70px, 9vh); gap: 20px; }
+  .hero-sub { font-size: 15px; max-width: 34ch; }
+  .scroll-hint { bottom: 16px; }
+}
 
 /* Panels */
 .panel { display: flex; flex-direction: column; justify-content: center; }
@@ -419,7 +426,7 @@ section { min-height: 100vh; padding: 140px max(16px, 6vw) 100px; }
 #projects .projects { width: 100%; text-align: left; }
 
 @media (max-width: 1000px) {
-  .who { grid-template-columns: 1fr; padding-top: 120px; padding-bottom: 120px; }
+  .who { grid-template-columns: 1fr; align-content: center; padding-top: 120px; padding-bottom: 120px; }
   .gate-cards { grid-template-columns: repeat(2, 1fr); }
   .steps { grid-template-columns: repeat(3, 1fr); row-gap: 56px; }
   .step:nth-child(3n)::after { display: none; }

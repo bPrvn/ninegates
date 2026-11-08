@@ -518,6 +518,7 @@ const plateU = {
   uHeroImg: { value: new THREE.Vector2(HERO_W, HERO_H) },
   uHeroC: { value: new THREE.Vector2(0.51, 0.5) },
   uHeroZ: { value: 1.04 },
+  uHeroS: { value: 1 },    // device px per image px (cover on desktop, whole gate on phones)
   uHero: { value: 1 },
   uPar: { value: new THREE.Vector2() },   // cursor, -1..1
   uLight: { value: new THREE.Vector2(0.5, 0.5) }, // cursor lantern, screen 0..1
@@ -541,7 +542,7 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
   fragmentShader: /* glsl */`
     uniform sampler2D tPlate, tHero, tGate;
     uniform vec2 uImg, uRes, uCursor, uCenter, uHeroImg, uHeroC, uPar;
-    uniform float uZoom, uTime, uFade, uFlash, uGate, uDark, uHeroZ, uHero, uPortal;
+    uniform float uZoom, uTime, uFade, uFlash, uGate, uDark, uHeroZ, uHero, uPortal, uHeroS;
     uniform vec2 uLight;
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
     float noise(vec2 p){
@@ -587,10 +588,13 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
 
     // the aurora gate, alive: flowing aurora, twinkling stars, drifting mist, rippling water
     vec3 heroColor(vec2 frag){
-      float s = max(uRes.x / uHeroImg.x, uRes.y / uHeroImg.y);
-      vec2 uv = uHeroC + ((frag - uRes * 0.5) / (uHeroImg * s)) / uHeroZ;
+      vec2 uv = uHeroC + ((frag - uRes * 0.5) / (uHeroImg * uHeroS)) / uHeroZ;
       // cursor: the whole image slides left/right/up/down, no tilt
       uv += uPar * vec2(0.022, 0.018);
+      // tall phone screens show more than the image: mirror the sky/water beyond its edges and fade it out
+      float outY = max(-uv.y, uv.y - 1.0);
+      float edgeFade = 1.0 - smoothstep(0.0, 0.28, outY);
+      uv.y = uv.y < 0.0 ? -uv.y : (uv.y > 1.0 ? 2.0 - uv.y : uv.y);
       uv = clamp(uv, 0.0005, 0.9995);
       float aspect = uHeroImg.x / uHeroImg.y;
       float t = uTime;
@@ -618,6 +622,7 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
 
       vec3 col = texture2D(tHero, vec2(duv.x, 1.0 - duv.y)).rgb;
       vec3 g = pow(col, vec3(1.0 / 2.2));
+      g = mix(vec3(0.0, 0.067, 0.04), g, edgeFade);
 
       // aurora brightness waves travel along the bands
       float green = clamp((g.g - g.r) * 1.6, 0.0, 1.0);
@@ -683,7 +688,8 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
         float sgn = mod(cyc, 2.0) < 1.0 ? -1.0 : 1.0;                 // -1: from the right, +1: from the left
         vec2 dir = normalize(vec2(sgn, 0.36 + 0.12 * r2));            // always heading down, tail trailing up
         float sx = 0.8 + 0.3 * r1;
-        vec2 start = vec2(sgn < 0.0 ? ar * sx : ar * (1.0 - sx), -0.04 + 0.1 * r2);
+        float top = ar < 0.73 ? 0.12 : -0.04;                         // phones: start below the menu bar
+        vec2 start = vec2(sgn < 0.0 ? ar * sx : ar * (1.0 - sx), top + 0.1 * r2);
         vec2 head = start + dir * k * (ar * 0.95);
         vec2 d = vec2(q.x * ar, q.y) - head;
         float along = -dot(d, dir);                                   // > 0 behind the head
@@ -921,10 +927,14 @@ function tick() {
     const hp = THREE.MathUtils.clamp(scrollY / innerHeight, 0, 1);
     const mix = 1 - THREE.MathUtils.smoothstep(hp, 0.3, 0.95);
     const z = 1.08 + hp * hp * 0.35;
-    const hs = Math.max(innerWidth / HERO_W, innerHeight / HERO_H);
+    // cover the screen, but on tall phone screens never crop the gate (490 px wide in the image)
+    const portrait = innerWidth / innerHeight < 0.73;   // phones: matches the CSS media query
+    const hs = portrait ? Math.max(innerWidth / HERO_W, (0.88 * innerWidth) / 490) : Math.max(innerWidth / HERO_W, innerHeight / HERO_H);
+    plateU.uHeroS.value = hs * renderer.getPixelRatio();
     const hx = innerWidth / (HERO_W * hs) / 2 / z, hy = innerHeight / (HERO_H * hs) / 2 / z;
     const cx = THREE.MathUtils.clamp(0.512, hx + 0.03, 1 - hx - 0.03);
-    const cy = THREE.MathUtils.clamp(0.5 + hp * 0.06, hy + 0.025, 1 - hy - 0.025);
+    // phones: the gate (centre at image y 0.472) sits at 56% of the screen, headline in the sky above, text over the water below
+    const cy = portrait ? 0.472 - 0.12 * hy + hp * 0.06 : THREE.MathUtils.clamp(0.5 + hp * 0.06, hy + 0.025, 1 - hy - 0.025);
     plateU.uPar.value.set(mouse.sx, mouse.sy);
     plateU.uLight.value.set((mouse.sx + 1) / 2, (mouse.sy + 1) / 2);
     // is the cursor inside the arch opening? (same mapping as the shader)
