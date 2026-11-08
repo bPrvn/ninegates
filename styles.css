@@ -77,6 +77,15 @@ a { color: inherit; text-decoration: none; }
   mix-blend-mode: difference;
 }
 .cursor.is-hover { width: 64px; height: 64px; margin: -32px 0 0 -32px; background: rgba(240, 201, 146, 0.15); }
+/* hovering the glowing arch: the cursor becomes an invitation */
+.cursor::after {
+  content: "Enter the gate"; position: absolute; left: 50%; top: calc(100% + 12px); transform: translate(-50%, 6px);
+  white-space: nowrap; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold);
+  opacity: 0; transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+body.portal-hover .cursor { width: 76px; height: 76px; margin: -38px 0 0 -38px; background: rgba(255, 211, 151, 0.18); border-color: rgba(255, 211, 151, 0.9); mix-blend-mode: normal; }
+body.portal-hover .cursor::after { opacity: 1; transform: translate(-50%, 0); }
+body.portal-hover .hero { cursor: pointer; }
 @media (hover: none) { .cursor { display: none; } }
 
 /* ---------- Nav ---------- */
@@ -142,27 +151,50 @@ section { min-height: 100vh; padding: 140px max(16px, 6vw) 100px; }
 .hero {
   position: relative; height: 100vh; padding: 0;
   text-align: center;
+  --mx: 0; --my: 0;               /* smoothed cursor, set in main.js */
 }
-/* each row sits at its exact Figma y, scaled with the background (see layoutHero in main.js) */
-.hero-row {
-  position: absolute; left: 0; right: 0;
-  top: calc(var(--poy, 0px) + var(--y) * var(--ps, 1) * 1px);
-  transform: translateY(-50%);
-  display: flex; justify-content: center;
-}
-.hero-cta { transform: translateY(-50%) scale(var(--bs, 1)); }
-.hero .eyebrow { font-size: 18px; line-height: 1; letter-spacing: 0.01em; color: var(--cream); white-space: nowrap; }
+/* Headline: two big lines over the gate, with a soft glow so they read on the stone */
 .hero-title {
-  font-family: var(--serif); font-weight: 300; color: var(--gold);
-  font-size: 84px; line-height: 1; letter-spacing: 0.005em; white-space: nowrap;
-  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
-  perspective: 600px;
+  position: absolute; left: 0; right: 0;
+  top: calc(46% - 1.08em);
+  margin: 0; display: flex; flex-direction: column; align-items: center;
+  font-family: var(--sans); font-weight: 500; color: var(--cream);
+  font-size: clamp(54px, min(12.6vw, 22vh), 236px);
+  line-height: 0.98; letter-spacing: -0.015em; white-space: nowrap;
+  pointer-events: none;   /* clicks reach the gate; letters still react via JS */
 }
-.hero-title .ch {
-  display: inline-block; color: var(--gold);
-  will-change: transform, opacity, filter;
+.hl { display: block; position: relative; }
+.hl-back {
+  margin-bottom: 0.08em;
+  color: #fbf8f1;
+  text-shadow: 0 2px 30px rgba(0, 17, 10, 0.6), 0 0 60px rgba(120, 255, 200, 0.22);
+  translate: calc(var(--mx) * -14px) calc(var(--my) * -8px);
 }
-.hero-title .sp { display: inline-block; width: 0.28em; }
+.hl-front {
+  color: #fbf8f1;
+  text-shadow: 0 2px 30px rgba(0, 17, 10, 0.55), 0 0 60px rgba(120, 255, 200, 0.22);
+  translate: calc(var(--mx) * -26px) calc(var(--my) * -14px);
+}
+.hl .ch { display: inline-block; }
+.hl .sp { display: inline-block; width: 0.24em; }
+.hero-dot {
+  display: inline-block; width: 0.15em; height: 0.15em; margin-left: 0.04em;
+  border-radius: 50%; background: var(--gold); vertical-align: baseline;
+  box-shadow: 0 0 24px rgba(255, 211, 151, 0.7);
+  animation: dotGlow 3.2s ease-in-out infinite;
+}
+@keyframes dotGlow { 50% { box-shadow: 0 0 44px rgba(255, 211, 151, 0.95); } }
+
+.hero-foot {
+  position: absolute; left: 0; right: 0; bottom: max(96px, 12vh); z-index: 3;
+  display: flex; flex-direction: column; align-items: center; gap: 26px;
+  padding: 0 16px;
+}
+.hero-sub {
+  max-width: 640px; margin: 0;
+  font-size: clamp(15px, 1.35vw, 20px); line-height: 1.5; color: var(--cream);
+  text-shadow: 0 1px 18px rgba(0, 17, 10, 0.85);
+}
 .scroll-hint {
   position: absolute; bottom: 28px; left: 0; right: 0; margin: 0 auto; width: fit-content;
   font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);

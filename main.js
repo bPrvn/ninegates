@@ -502,8 +502,26 @@ const plateTex = new THREE.TextureLoader().load('assets/hero-plate.png');
 plateTex.colorSpace = THREE.SRGBColorSpace;
 plateTex.generateMipmaps = false;
 plateTex.minFilter = THREE.LinearFilter;
+// hero: the aurora gate render + the gate cut out of it (used to keep the stone still)
+const HERO_W = 1600, HERO_H = 763;
+const loadTex = (src) => {
+  const t = new THREE.TextureLoader().load(src);
+  t.colorSpace = THREE.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = THREE.LinearFilter;
+  return t;
+};
+const heroTex = loadTex('assets/hero-aurora.png');
+const gateTex = loadTex('assets/hero-gate.png');
 const plateU = {
   tPlate: { value: plateTex },
+  tHero: { value: heroTex },
+  tGate: { value: gateTex },
+  uHeroImg: { value: new THREE.Vector2(HERO_W, HERO_H) },
+  uHeroC: { value: new THREE.Vector2(0.51, 0.5) },
+  uHeroZ: { value: 1.04 },
+  uHero: { value: 1 },
+  uPar: { value: new THREE.Vector2() },   // cursor, -1..1
+  uLight: { value: new THREE.Vector2(0.5, 0.5) }, // cursor lantern, screen 0..1
+  uPortal: { value: 0 },                   // gate opening, 0 idle .. 1 hovered
   uImg: { value: new THREE.Vector2(PLATE_W, PLATE_H) },
   uRes: { value: new THREE.Vector2() },
   uCursor: { value: new THREE.Vector2(0.5, 0.85) },
@@ -521,9 +539,10 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
   uniforms: plateU, transparent: true, depthTest: false, depthWrite: false,
   vertexShader: /* glsl */`void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }`,
   fragmentShader: /* glsl */`
-    uniform sampler2D tPlate;
-    uniform vec2 uImg, uRes, uCursor, uCenter;
-    uniform float uZoom, uTime, uFade, uFlash, uGate, uDark;
+    uniform sampler2D tPlate, tHero, tGate;
+    uniform vec2 uImg, uRes, uCursor, uCenter, uHeroImg, uHeroC, uPar;
+    uniform float uZoom, uTime, uFade, uFlash, uGate, uDark, uHeroZ, uHero, uPortal;
+    uniform vec2 uLight;
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
     float noise(vec2 p){
       vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
@@ -535,6 +554,114 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
     const vec2  OC = vec2(687.0, 583.0);
     const float OR = 33.0;
     const float OB = 650.0;
+
+    const vec4 GBOX = vec4(572.0, 170.0, 490.0, 390.0);
+    float gateA(vec2 uv){
+      vec2 g = (uv * uHeroImg - GBOX.xy) / GBOX.zw;
+      if (g.x < 0.0 || g.y < 0.0 || g.x > 1.0 || g.y > 1.0) return 0.0;
+      return texture2D(tGate, vec2(g.x, 1.0 - g.y)).a;
+    }
+    // rising light motes, in screen space (q: 0..1, y down)
+    float motes(vec2 q, float t){
+      float acc = 0.0;
+      for (int l = 0; l < 2; l++){
+        float fl = float(l);
+        float sc = 16.0 + fl * 12.0;
+        vec2 p = vec2(q.x * uRes.x / uRes.y, q.y) * sc;
+        p.y += t * (0.22 - fl * 0.08);
+        p.x += sin(p.y * 0.7 + fl * 3.0 + t * 0.3) * 0.25;
+        vec2 id = floor(p), f = fract(p) - 0.5;
+        float h = hash(id + fl * 17.0);
+        vec2 o = (vec2(hash(id + 3.1), hash(id + 7.7)) - 0.5) * 0.6;
+        float d = length(f - o);
+        acc += step(0.88, h) * smoothstep(0.09 - fl * 0.03, 0.0, d) * (0.45 + 0.55 * sin(t * 1.7 + h * 60.0)) * (1.0 - fl * 0.4);
+      }
+      return acc;
+    }
+    // signed distance to the arch opening of the main gate (image px)
+    float portalD(vec2 P){
+      const vec2 C = vec2(703.0, 396.0); const float R = 66.0;
+      float d = P.y >= C.y ? abs(P.x - C.x) - R : length(P - C) - R;
+      return max(d, P.y - 548.0);
+    }
+
+    // the aurora gate, alive: flowing aurora, twinkling stars, drifting mist, rippling water
+    vec3 heroColor(vec2 frag){
+      float s = max(uRes.x / uHeroImg.x, uRes.y / uHeroImg.y);
+      vec2 uv = uHeroC + ((frag - uRes * 0.5) / (uHeroImg * s)) / uHeroZ;
+      // cursor: the whole image slides left/right/up/down, no tilt
+      uv += uPar * vec2(0.022, 0.018);
+      uv = clamp(uv, 0.0005, 0.9995);
+      float aspect = uHeroImg.x / uHeroImg.y;
+      float t = uTime;
+      float still = gateA(uv);                       // never bend the stone itself
+      float sky = (1.0 - smoothstep(0.30, 0.46, uv.y)) * (1.0 - still);
+      float water = smoothstep(0.72, 0.78, uv.y) * (1.0 - still);
+
+      vec2 duv = uv;
+      // aurora: slow curtains folding sideways
+      vec2 ap = vec2(uv.x * 2.2 - t * 0.035, uv.y * 4.0 + t * 0.012);
+      duv += sky * vec2(fbm(ap) - 0.5, (fbm(ap + 7.3) - 0.5) * 0.6) * 0.022;
+      // water: fine ripples travelling toward the viewer
+      float rip = sin(uv.y * 520.0 - t * 1.6 + fbm(uv * vec2(9.0, 30.0) + t * 0.15) * 6.0);
+      duv += water * vec2(rip * 0.0014, rip * 0.0008);
+
+      vec3 col = texture2D(tHero, vec2(duv.x, 1.0 - duv.y)).rgb;
+      vec3 g = pow(col, vec3(1.0 / 2.2));
+
+      // aurora brightness waves travel along the bands
+      float green = clamp((g.g - g.r) * 1.6, 0.0, 1.0);
+      float wave = fbm(vec2(uv.x * 3.0 - t * 0.09, uv.y * 6.0 + t * 0.03));
+      g += vec3(0.05, 0.42, 0.28) * green * sky * (smoothstep(0.35, 0.8, wave) * 0.55 - 0.08);
+
+      // stars
+      vec2 cell = floor(uv * vec2(260.0, 124.0));
+      float h = hash(cell);
+      float star = step(0.985, h) * (0.5 + 0.5 * sin(t * (1.5 + h * 3.0) + h * 40.0));
+      vec2 f = fract(uv * vec2(260.0, 124.0)) - 0.5;
+      g += vec3(0.85, 1.0, 0.95) * star * exp(-dot(f, f) * 40.0) * 0.5 * (1.0 - smoothstep(0.12, 0.3, uv.y)) * (1.0 - still);
+
+      // water shimmer
+      float sh = smoothstep(0.62, 0.95, fbm(vec2(uv.x * 14.0 + t * 0.1, uv.y * 60.0 - t * 0.5)));
+      g += vec3(0.2, 0.75, 0.55) * sh * water * green * 0.35;
+
+      // low mist drifting across the base of the gate
+      float dy = uv.y - 0.705;
+      vec2 mp = vec2(uv.x * 5.0 * aspect * 0.5 + t * 0.03, uv.y * 18.0 - t * 0.02);
+      float mist = smoothstep(0.42, 0.85, fbm(mp + fbm(mp * 0.6 - t * 0.04)));
+      float cd = length((uv - uCursor) * vec2(aspect, 1.0));
+      g += vec3(0.32, 0.72, 0.56) * mist * exp(-dy * dy / 0.0016) * 0.22 * (1.0 - 0.6 * exp(-cd * cd / 0.01));
+
+      // a soft breath of light inside the arch
+      vec2 o = (uv - vec2(0.437, 0.6)) / vec2(0.05, 0.12);
+      g += vec3(0.08, 0.35, 0.24) * exp(-dot(o, o)) * (0.5 + 0.5 * sin(t * 0.9)) * 0.35 * (1.0 - still);
+
+      // the portal: light pours from the arch opening; brighter when hovered
+      vec2 P = uv * uHeroImg;
+      float pd = portalD(P);
+      float pin = 1.0 - smoothstep(-6.0, 2.0, pd);
+      float breathe = 0.5 + 0.5 * sin(t * 1.1);
+      float pw = 0.12 + 0.08 * breathe + 0.75 * uPortal;
+      vec3 gold = vec3(1.0, 0.83, 0.59), mint = vec3(0.45, 1.0, 0.78);
+      float rise = smoothstep(396.0, 548.0, P.y);
+      g += mix(mint, gold, 0.35 + 0.5 * uPortal) * pin * pw * (0.55 + 0.45 * rise) * (1.0 - still);
+      g += mix(mint, gold, 0.5) * exp(-max(pd, 0.0) / (18.0 + 30.0 * uPortal)) * (1.0 - pin) * pw * 0.35 * (1.0 - still);
+      // spill on the water below the opening
+      float sx = (P.x - 703.0) / (70.0 + 40.0 * uPortal);
+      float spill = exp(-sx * sx) * exp(-max(P.y - 552.0, 0.0) / 90.0) * step(552.0, P.y);
+      g += mix(mint, gold, 0.5) * spill * pw * 0.35;
+
+      // cursor lantern: lights what it passes over
+      vec2 q = frag / uRes;
+      vec2 lq = (q - uLight) * vec2(uRes.x / uRes.y, 1.0);
+      float lamp = exp(-dot(lq, lq) / 0.035);
+      g += g * vec3(0.55, 1.0, 0.85) * lamp * 0.85 + vec3(0.05, 0.16, 0.12) * lamp * 0.35;
+
+      // motes drifting up out of the water
+      float mo = motes(q, t) * smoothstep(0.25, 0.75, q.y);
+      g += mix(mint, gold, hash(floor(q * 40.0))) * mo * 0.55;
+      return g;   // display space
+    }
 
     void main(){
       // cover-fit camera over the image; at centre 0.5 / zoom 1 it is the Figma frame 1:1
@@ -587,6 +714,7 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
       }
 
       g *= 1.0 - uDark;
+      if (uHero > 0.001) g = mix(g, heroColor(frag), uHero);
       g = mix(g, vec3(0.93, 0.88, 0.80), uFlash);   // coming out of the gate's light
       col = pow(max(g, 0.0), vec3(2.2));
       gl_FragColor = vec4(col, uFade);
@@ -637,6 +765,7 @@ const rig = { px: 0, py: 3.7, pz: 21, tx: 0, ty: 3.7, tz: DOOR_Z };
 const HERO = { px: 0, py: 0.95, pz: 0, tx: 0, ty: 0.95, tz: -60 };
 const fx = { seam: 0.0, flood: 0, open: 0, parallax: 0, lens: 0 };
 let introDone = false;
+let portalHover = false, mouseSeen = false;
 let scrollP = 0;
 const mouse = { x: 0, y: 0, sx: 0, sy: 0 };
 const lookAt = new THREE.Vector3();
@@ -725,6 +854,35 @@ function tick() {
   }
   plateU.uFade.value = plateIntro.v;
 
+  // ---- hero: slow breathing push-in, cursor parallax, scroll walks toward the gate, then hands over to the hall
+  {
+    const hp = THREE.MathUtils.clamp(scrollY / innerHeight, 0, 1);
+    const mix = 1 - THREE.MathUtils.smoothstep(hp, 0.3, 0.95);
+    const z = 1.08 + hp * hp * 0.35;
+    const hs = Math.max(innerWidth / HERO_W, innerHeight / HERO_H);
+    const hx = innerWidth / (HERO_W * hs) / 2 / z, hy = innerHeight / (HERO_H * hs) / 2 / z;
+    const cx = THREE.MathUtils.clamp(0.512, hx + 0.03, 1 - hx - 0.03);
+    const cy = THREE.MathUtils.clamp(0.5 + hp * 0.06, hy + 0.025, 1 - hy - 0.025);
+    plateU.uPar.value.set(mouse.sx, mouse.sy);
+    plateU.uLight.value.set((mouse.sx + 1) / 2, (mouse.sy + 1) / 2);
+    // is the cursor inside the arch opening? (same mapping as the shader)
+    const mxp = ((mouse.x + 1) / 2) * innerWidth, myp = ((mouse.y + 1) / 2) * innerHeight;
+    const ux = (cx + (mxp - innerWidth / 2) / (HERO_W * hs) / z + mouse.sx * 0.022) * HERO_W;
+    const uy = (cy + (myp - innerHeight / 2) / (HERO_H * hs) / z + mouse.sy * 0.018) * HERO_H;
+    const pd = uy >= 396 ? Math.abs(ux - 703) - 66 : Math.hypot(ux - 703, uy - 396) - 66;
+    const over = introDone && hp < 0.25 && mouseSeen && Math.max(pd, uy - 548) < 6;
+    if (over !== portalHover) {
+      portalHover = over;
+      document.body.classList.toggle('portal-hover', over);
+    }
+    plateU.uPortal.value += ((over ? 1 : 0) - plateU.uPortal.value) * (1 - Math.pow(0.02, dt));
+    plateU.uHeroC.value.set(cx, cy);
+    plateU.uHeroZ.value = z;
+    plateU.uHero.value = mix;
+    heroEl.style.setProperty('--mx', mouse.sx.toFixed(4));
+    heroEl.style.setProperty('--my', mouse.sy.toFixed(4));
+  }
+
   if (plateU.uFade.value < 1) {
     composer.render();                       // 3D entry gate
     if (plateU.uFade.value > 0) {
@@ -742,16 +900,21 @@ function tick() {
    UI helpers
    ========================================================= */
 // Split hero title into characters, keeping words together
+const heroEl = document.querySelector('.hero');
 const heroTitle = document.getElementById('heroTitle');
-heroTitle.setAttribute('aria-label', heroTitle.textContent);
-heroTitle.innerHTML = heroTitle.textContent
-  .split(' ')
-  .map((w) => `<span style="display:inline-block;white-space:nowrap" aria-hidden="true">${[...w].map((c) => `<span class="ch">${c}</span>`).join('')}</span>`)
-  .join('<span class="sp"> </span>');
-const chars = heroTitle.querySelectorAll('.ch');
+heroTitle.querySelectorAll('.hl').forEach((line) => {
+  const dot = line.querySelector('.hero-dot');
+  const text = [...line.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
+  line.innerHTML = text
+    .split(' ')
+    .map((w) => `<span style="display:inline-block;white-space:nowrap">${[...w].map((c) => `<span class="ch">${c}</span>`).join('')}</span>`)
+    .join('<span class="sp"> </span>');
+  if (dot) line.lastElementChild.appendChild(dot);
+});
+const chars = heroTitle.querySelectorAll('.ch, .hero-dot');
 
 gsap.set('.nav', { opacity: 0, y: -20 });
-gsap.set(chars, { opacity: 0, yPercent: 45 });
+gsap.set(chars, { opacity: 0, yPercent: 40, filter: 'blur(10px)' });
 gsap.set('.hero .reveal-up', { opacity: 0, y: 30 });
 
 /* =========================================================
@@ -784,9 +947,9 @@ intro
   .to(plateU.uFlash, { value: 0, duration: 1.6, ease: 'power2.out' }, 5.7)
   // UI arrives
   .to('.nav', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }, 6.2)
-  .to('.hero .eyebrow', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, 6.2)
-  .to(chars, { opacity: 1, yPercent: 0, duration: 1.1, stagger: 0.035, ease: 'power3.out' }, 6.3)
-  .to('.hero .btn', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, 6.9)
+  .to(chars, { opacity: 1, yPercent: 0, filter: 'blur(0px)', duration: 1.2, stagger: 0.03, ease: 'power3.out', clearProps: 'filter,willChange' }, 6.2)
+  .to('.hero-sub', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, 6.8)
+  .to('.hero .btn', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, 7.0)
   .to('.scroll-hint', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, 7.2)
   .set('.loader', { display: 'none' }, 2.6)
   .call(finishIntro, null, 6.6);
@@ -813,8 +976,9 @@ function setupScroll() {
     onUpdate: (s) => (scrollP = s.progress),
   });
 
-  gsap.to('.hero', {
-    opacity: 0, y: -80, ease: 'none',
+  // fade the hero copy as you scroll
+  gsap.to('.hl, .hero-foot, .scroll-hint', {
+    opacity: 0, ease: 'none',
     scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom 35%', scrub: true },
   });
 
@@ -1253,6 +1417,13 @@ ScrollTrigger.create({
 addEventListener('pointermove', (e) => {
   mouse.x = (e.clientX / innerWidth) * 2 - 1;
   mouse.y = (e.clientY / innerHeight) * 2 - 1;
+  mouseSeen = true;
+});
+// step through the glowing gate: click the arch opening to enter the site
+heroEl.addEventListener('click', (e) => {
+  if (!portalHover || e.target.closest('a, button')) return;
+  const next = document.getElementById('about');
+  if (next) window.scrollTo({ top: next.offsetTop, behavior: 'smooth' });
 });
 
 // smooth anchor navigation
@@ -1287,6 +1458,18 @@ if (!isTouch) {
   document.querySelectorAll('a, button, .gate-card, .proj-card, .tt').forEach((el) => {
     el.addEventListener('pointerenter', () => cursor.classList.add('is-hover'));
     el.addEventListener('pointerleave', () => cursor.classList.remove('is-hover'));
+  });
+
+  // headline letters lift as the cursor passes over them
+  const lift = [...heroTitle.querySelectorAll('.ch')].map((ch) => ({ ch, to: gsap.quickTo(ch, 'y', { duration: 0.7, ease: 'power3.out' }) }));
+  addEventListener('pointermove', (e) => {
+    if (!introDone || scrollY > innerHeight * 0.6) return;
+    const R = Math.max(90, innerWidth * 0.07);
+    for (const { ch, to } of lift) {
+      const r = ch.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      to(-Math.exp(-(dx * dx + dy * dy) / (R * R)) * r.height * 0.09);
+    }
   });
 
   // magnetic buttons
@@ -1326,24 +1509,10 @@ addEventListener('resize', measureSlide);
 /* =========================================================
    Hero layout — pin the HTML text to the Figma frame positions
    ========================================================= */
-const heroEl = document.querySelector('.hero');
 function layoutHero() {
-  const W = innerWidth, H = innerHeight;
-  const ps = Math.max(W / PLATE_W, H / PLATE_H);       // same cover-fit as the shader
-  heroEl.style.height = H + 'px';
-  heroEl.style.setProperty('--ps', ps);
-  heroEl.style.setProperty('--poy', (H - PLATE_H * ps) / 2 + 'px');
-  heroEl.style.setProperty('--bs', Math.min(ps, 1.25));
-  // fit eyebrow / title to their exact Figma widths (capped on narrow screens)
-  heroEl.querySelectorAll('[data-fit]').forEach((row) => {
-    const el = row.firstElementChild;
-    el.style.fontSize = '100px';
-    const natural = el.getBoundingClientRect().width / (parseFloat(getComputedStyle(el).scale) || 1);
-    const target = Math.min(+row.dataset.fit * ps, W * 0.9);
-    if (natural > 0) el.style.fontSize = (100 * target) / natural + 'px';
-  });
+  heroEl.style.height = innerHeight + 'px';
   const pr = renderer.getPixelRatio();
-  plateU.uRes.value.set(W * pr, H * pr);
+  plateU.uRes.value.set(innerWidth * pr, innerHeight * pr);
 }
 
 /* =========================================================

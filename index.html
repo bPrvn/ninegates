@@ -3,15 +3,76 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ninegates — Every gate your brand needs</title>
-  <meta name="description" content="Ninegates — every gate your brand needs, all in one place." />
+  <title>NineGates | Branding, Content, Web &amp; AI Creative Studio in India</title>
+  <meta name="description" content="NineGates is a creative studio for modern brands. Brand identity, creative content, AI creative studio, websites, digital growth and performance marketing — every gate your brand needs, all in one place." />
+  <meta name="keywords" content="NineGates, creative agency India, branding agency, brand identity, logo design, web design, website development, AI creative studio, content creation, digital marketing, performance marketing, social media marketing" />
+  <meta name="author" content="NineGates" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://ninegatess.com/" />
+
+  <!-- Social sharing (WhatsApp, LinkedIn, Facebook, X) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="NineGates" />
+  <meta property="og:title" content="NineGates — Every gate your brand needs. All in one place." />
+  <meta property="og:description" content="Branding, content, digital and AI production under one roof. A creative partner for strategy, design, content and technology." />
+  <meta property="og:url" content="https://ninegatess.com/" />
+  <meta property="og:image" content="https://ninegatess.com/assets/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="A corridor of arched gates — NineGates" />
+  <meta property="og:locale" content="en_IN" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NineGates — Every gate your brand needs" />
+  <meta name="twitter:description" content="Branding, content, digital and AI production under one roof." />
+  <meta name="twitter:image" content="https://ninegatess.com/assets/og-image.jpg" />
+
+  <!-- Structured data: tells Google who NineGates is, what it offers and how to reach it -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "NineGates",
+    "url": "https://ninegatess.com/",
+    "logo": "https://ninegatess.com/assets/favicon/icon-512.png",
+    "image": "https://ninegatess.com/assets/og-image.jpg",
+    "description": "A creative studio for modern brands: branding, content, digital and AI production under one roof.",
+    "slogan": "Every gate your brand needs. All in one place.",
+    "email": "ninegates.official@gmail.com",
+    "telephone": "+91 80745 70609",
+    "address": { "@type": "PostalAddress", "addressCountry": "IN" },
+    "areaServed": "IN",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+91 80745 70609",
+      "email": "ninegates.official@gmail.com",
+      "contactType": "sales",
+      "availableLanguage": ["English"]
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Six Gates",
+      "itemListElement": [
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Brand & Identity" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Creative & Content" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "AI Creative Studio" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Web & Digital Experience" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Digital Growth" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Performance Marketing" } }
+      ]
+    }
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Outfit:wght@300;400;500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="assets/favicon/favicon.svg" type="image/svg+xml" />
-  <link rel="icon" href="assets/favicon/icon-32.png" sizes="32x32" type="image/png" />
-  <link rel="icon" href="assets/favicon/icon-16.png" sizes="16x16" type="image/png" />
-  <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png" />
+  <!-- favicons: PNG/ICO first (Safari ignores SVG), SVG for modern browsers -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" href="/assets/favicon/icon-32.png" sizes="32x32" type="image/png" />
+  <link rel="icon" href="/assets/favicon/icon-16.png" sizes="16x16" type="image/png" />
+  <link rel="icon" href="/assets/favicon/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
+  <link rel="mask-icon" href="/assets/favicon/favicon.svg" color="#00110A" />
   <link rel="manifest" href="site.webmanifest" />
   <meta name="theme-color" content="#00110A" />
   <script>
@@ -21,6 +82,12 @@
     addEventListener('beforeunload', function () { window.scrollTo(0, 0); });
   </script>
   <link rel="stylesheet" href="styles.css" />
+  <!-- without JavaScript (some crawlers), show all content instead of waiting for the intro -->
+  <noscript><style>
+    body.is-loading { overflow: auto; }
+    body.is-loading main > :not(.hero), .nav, .hero .reveal-up, .hero-title .ch { visibility: visible !important; opacity: 1 !important; }
+    .loader { display: none !important; }
+  </style></noscript>
   <script type="importmap">
     {
       "imports": {
@@ -71,19 +138,18 @@
     <!-- HERO -->
     <!-- Rows are pinned to the exact Figma positions (y in 1440×900 frame px) by main.js -->
     <section class="hero" id="home">
-      <div class="hero-row" style="--y: 377.5" data-fit="313">
-        <p class="eyebrow reveal-up" id="heroEyebrow">Every gate your brand needs</p>
-      </div>
-      <div class="hero-row" style="--y: 452" data-fit="545">
-        <h1 class="hero-title" id="heroTitle">All in one place</h1>
-      </div>
-      <div class="hero-row hero-cta" style="--y: 698.5">
-      <a href="#contact" class="btn btn-glass magnetic reveal-up js-open-form">
-        <span class="btn-arrow">
-          <svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6" /></svg>
-        </span>
-        <span>Start a Project</span>
-      </a>
+      <h1 class="hero-title" id="heroTitle" aria-label="Every gate, in one place.">
+        <span class="hl hl-back" aria-hidden="true">Every gate</span>
+        <span class="hl hl-front" aria-hidden="true">in one place<i class="hero-dot"></i></span>
+      </h1>
+      <div class="hero-foot">
+        <p class="hero-sub reveal-up">Branding, content, digital and AI production under one roof, so your brand looks and sounds the same everywhere it appears.</p>
+        <a href="#contact" class="btn btn-glass reveal-up js-open-form">
+          <span class="btn-arrow">
+            <svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6" /></svg>
+          </span>
+          <span>Start a Project</span>
+        </a>
       </div>
       <div class="scroll-hint reveal-up"><span></span>Scroll to walk through the gates</div>
     </section>
