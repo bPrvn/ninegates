@@ -596,15 +596,25 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
       float t = uTime;
       float still = gateA(uv);                       // never bend the stone itself
       float sky = (1.0 - smoothstep(0.30, 0.46, uv.y)) * (1.0 - still);
-      float water = smoothstep(0.72, 0.78, uv.y) * (1.0 - still);
+      // water: right under the gate it starts at its base; at the sides the glowing streams start higher
+      float zone = smoothstep(0.24, 0.35, uv.x) * (1.0 - smoothstep(0.67, 0.78, uv.x));
+      float hz = mix(0.62, 0.716, zone);
+      float water = smoothstep(hz, hz + 0.03, uv.y) * (1.0 - still);
+      float wd = max(uv.y - hz, 0.0);
+      // perspective water plane: waves get bigger and faster as they come toward you
+      vec2 wp = vec2((uv.x - 0.5) * aspect, 1.0) / (wd + 0.07);
+      vec2 fp = wp * vec2(0.55, 0.45) + vec2(t * 0.04, t * 0.55);
+      float n1 = fbm(fp), n2 = fbm(fp * 1.7 + vec2(3.1, t * 0.25));
 
       vec2 duv = uv;
       // aurora: slow curtains folding sideways
       vec2 ap = vec2(uv.x * 2.2 - t * 0.035, uv.y * 4.0 + t * 0.012);
       duv += sky * vec2(fbm(ap) - 0.5, (fbm(ap + 7.3) - 0.5) * 0.6) * 0.022;
-      // water: fine ripples travelling toward the viewer
-      float rip = sin(uv.y * 520.0 - t * 1.6 + fbm(uv * vec2(9.0, 30.0) + t * 0.15) * 6.0);
-      duv += water * vec2(rip * 0.0014, rip * 0.0008);
+      // water: rolling swell toward the viewer + rippling reflections of the gate
+      float amp = 0.002 + 0.011 * smoothstep(0.0, 0.28, wd);
+      duv += water * vec2((n1 - 0.5) * amp * 1.3, (n2 - 0.5) * amp * 0.8);
+      float rip = sin(uv.y * 430.0 - t * 2.4 + n1 * 7.0);
+      duv.x += water * rip * 0.0022 * (1.0 - smoothstep(0.02, 0.2, wd));
 
       vec3 col = texture2D(tHero, vec2(duv.x, 1.0 - duv.y)).rgb;
       vec3 g = pow(col, vec3(1.0 / 2.2));
@@ -621,9 +631,15 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
       vec2 f = fract(uv * vec2(260.0, 124.0)) - 0.5;
       g += vec3(0.85, 1.0, 0.95) * star * exp(-dot(f, f) * 40.0) * 0.5 * (1.0 - smoothstep(0.12, 0.3, uv.y)) * (1.0 - still);
 
-      // water shimmer
-      float sh = smoothstep(0.62, 0.95, fbm(vec2(uv.x * 14.0 + t * 0.1, uv.y * 60.0 - t * 0.5)));
-      g += vec3(0.2, 0.75, 0.55) * sh * water * green * 0.35;
+      // water: bright crests that travel with the flow, darker troughs between them
+      float crest = smoothstep(0.55, 0.88, fbm(fp * 2.2 + vec2(0.0, t * 0.4)));
+      float trough = smoothstep(0.55, 0.25, n2);
+      g += vec3(0.22, 0.85, 0.6) * crest * water * (green * 0.9 + 0.08) * 0.55;
+      g *= 1.0 - water * trough * 0.18;
+      // glints sparkling on the surface
+      vec2 gc = floor(fp * vec2(6.0, 4.0));
+      float gl = step(0.93, hash(gc)) * pow(max(sin(t * 2.5 + hash(gc + 1.7) * 30.0), 0.0), 8.0);
+      g += vec3(0.7, 1.0, 0.88) * gl * water * green * 0.6;
 
       // low mist drifting across the base of the gate
       float dy = uv.y - 0.705;
@@ -656,6 +672,52 @@ plateScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMat
       vec2 lq = (q - uLight) * vec2(uRes.x / uRes.y, 1.0);
       float lamp = exp(-dot(lq, lq) / 0.035);
       g += g * vec3(0.55, 1.0, 0.85) * lamp * 0.85 + vec3(0.05, 0.16, 0.12) * lamp * 0.35;
+
+      // comet: a slow, bright comet glides down across the top of the sky every 11 s, alternating sides
+      {
+        float ar = uRes.x / uRes.y;
+        float CP = 11.0, dur = 6.2;
+        float cyc = floor(t / CP), ph = mod(t, CP);
+        float k = clamp(ph / dur, 0.0, 1.0);
+        float r1 = hash(vec2(cyc, 1.3)), r2 = hash(vec2(cyc, 7.1));
+        float sgn = mod(cyc, 2.0) < 1.0 ? -1.0 : 1.0;                 // -1: from the right, +1: from the left
+        vec2 dir = normalize(vec2(sgn, 0.36 + 0.12 * r2));            // always heading down, tail trailing up
+        float sx = 0.8 + 0.3 * r1;
+        vec2 start = vec2(sgn < 0.0 ? ar * sx : ar * (1.0 - sx), -0.04 + 0.1 * r2);
+        vec2 head = start + dir * k * (ar * 0.95);
+        vec2 d = vec2(q.x * ar, q.y) - head;
+        float along = -dot(d, dir);                                   // > 0 behind the head
+        float side = dot(d, vec2(-dir.y, dir.x));
+        float b = max(along, 0.0);
+
+        // tail: widest at the head, tapering to a point, with fine bright strands
+        float L = 0.42;
+        float u = clamp(b / L, 0.0, 1.0);
+        float w = 0.004 + 0.03 * pow(1.0 - u, 0.7);
+        float fall = pow(1.0 - u, 1.2) * smoothstep(-0.012, 0.03, along);
+        float acr = exp(-(side / w) * (side / w) * 1.6);
+        float strands = 0.35 + 0.65 * pow(0.5 + 0.5 * sin(side / w * 9.0 + noise(vec2(b * 6.0, 1.3 + r1 * 5.0)) * 2.0), 1.5);
+        float glow = fall * exp(-(side / (w * 2.2)) * (side / (w * 2.2))) * 0.28;
+        float tail = fall * acr * strands + glow;
+        // a few sparks trailing off it
+        vec2 sc = vec2(b * 70.0, side * 120.0);
+        vec2 sid = floor(sc);
+        float sp = step(0.95, hash(sid + cyc)) * smoothstep(0.35, 0.0, length(fract(sc) - 0.5))
+                   * fall * exp(-(side / (w * 2.5)) * (side / (w * 2.5))) * (0.5 + 0.5 * sin(t * 6.0 + hash(sid) * 40.0));
+
+        // head: white-hot core, teal coma, wide soft halo
+        float hd = dot(d, d);
+        float core = exp(-hd / (0.011 * 0.011));
+        float coma = exp(-hd / (0.028 * 0.028)) * 0.95;
+        float halo = exp(-hd / (0.075 * 0.075)) * 0.3;
+
+        vec3 teal = vec3(0.35, 0.95, 0.78), white = vec3(0.92, 1.0, 0.97);
+        vec3 tc = mix(teal, white, exp(-b / 0.09));
+        vec3 cc = white * core * 1.8 + (teal * 0.6 + white * 0.4) * coma + teal * halo
+                + tc * tail * 1.1 + mix(teal, gold, 0.5) * sp * 0.8;
+        float live = smoothstep(0.0, 0.1, k) * (1.0 - smoothstep(0.85, 1.0, k)) * step(ph, dur);
+        g += cc * live;
+      }
 
       // motes drifting up out of the water
       float mo = motes(q, t) * smoothstep(0.25, 0.75, q.y);
