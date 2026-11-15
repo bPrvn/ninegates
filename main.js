@@ -1495,8 +1495,15 @@ addEventListener('pointermove', (e) => {
 heroEl.addEventListener('click', (e) => {
   if (!portalHover || e.target.closest('a, button')) return;
   const next = document.getElementById('about');
-  if (next) window.scrollTo({ top: next.offsetTop, behavior: 'smooth' });
+  if (next) window.scrollTo({ top: sectionTop(next), behavior: 'smooth' });
 });
+
+// page position of a section; pinned sections (Projects, Why) live inside a GSAP pin-spacer,
+// so measure the spacer, not the section (offsetTop is relative to the spacer and comes out wrong)
+function sectionTop(el) {
+  const box = el.parentElement && el.parentElement.classList.contains('pin-spacer') ? el.parentElement : el;
+  return Math.round(box.getBoundingClientRect().top + scrollY);
+}
 
 // smooth anchor navigation
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
@@ -1506,7 +1513,7 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     if (!target) return;
     e.preventDefault();
     if (!introDone) return;
-    window.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+    window.scrollTo({ top: sectionTop(target), behavior: 'smooth' });
     closeMenu();
   });
 });
@@ -1625,8 +1632,7 @@ const DEV_SKIP = new URLSearchParams(location.search).has('skip');
     history.replaceState(null, '', location.pathname);
     if (target) setTimeout(() => {
       ScrollTrigger.refresh();
-      const box = target.parentElement.classList.contains('pin-spacer') ? target.parentElement : target;
-      scrollTo(0, box.getBoundingClientRect().top + scrollY);
+      scrollTo(0, sectionTop(target));
     }, 900);
   }
 });
