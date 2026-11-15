@@ -1224,8 +1224,8 @@ const TESTIMONIALS = [
     quote: 'PLACEHOLDER — add the Little Moments testimonial here.', name: 'Client name', company: 'Little Moments',
   },
   {
-    img: 'assets/testimonials/exselent-launch-film.png', pos: '47% 30%', tpos: '50% 30%', title: 'RiVUe', cat: 'AI creative film',
-    quote: 'PLACEHOLDER — add RiVUe’s testimonial here.', name: 'Client name', company: 'RiVUe',
+    img: 'assets/testimonials/exselent-launch-film.png', pos: '47% 30%', tpos: '50% 30%', title: 'Exsalent', cat: 'AI creative film',
+    quote: 'PLACEHOLDER — add Exsalent’s testimonial here.', name: 'Client name', company: 'Exsalent',
   },
 ];
 {
